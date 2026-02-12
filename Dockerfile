@@ -1,21 +1,24 @@
-# Use Node.js 20 based on Alpine Linux
 FROM node:20-alpine
 
-# Create app directory
 WORKDIR /app
 
-# Copy backend package files first
-COPY backend/package*.json ./backend/
+# --- Build Frontend ---
+COPY frontend/package*.json ./frontend/
+WORKDIR /app/frontend
+RUN npm install
+COPY frontend/ ./
+# Build creates /app/frontend/dist
+RUN npm run build
 
-# Install dependencies
+# --- Setup Backend ---
+WORKDIR /app
+COPY backend/package*.json ./backend/
 WORKDIR /app/backend
 RUN npm install
-
-# Copy the rest of the backend source code
 COPY backend/ ./
 
-# Expose the port the app runs on (Railway uses environment variable PORT)
+# Expose port
 EXPOSE 3000
 
-# Start the application
+# Start backend
 CMD ["npm", "start"]
