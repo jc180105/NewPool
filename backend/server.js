@@ -13,7 +13,18 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// Basic route removed to allow frontend to be served on /
+// Basic route to test server and setup DB
+app.get('/setup-db', async (req, res) => {
+    try {
+        const fs = require('fs');
+        const schema = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
+        await pool.query(schema);
+        res.send('Database schema applied successfully!');
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error applying schema: ' + err.message);
+    }
+});
 
 // Import route handlers
 app.use('/clients', require('./routes/clients'));
