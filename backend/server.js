@@ -13,10 +13,7 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// Basic route to test server
-app.get('/', (req, res) => {
-    res.json({ message: 'PoolService Manager API is running' });
-});
+// Basic route removed to allow frontend to be served on /
 
 // Import route handlers
 app.use('/clients', require('./routes/clients'));
