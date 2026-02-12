@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { CheckCircle, Circle, MapPin, DollarSign, Clock } from 'lucide-react';
-import { fetchInstances, updateInstance } from '../services/api';
+import { CheckCircle, Circle, MapPin, DollarSign, Clock, Plus } from 'lucide-react';
+import { fetchInstances, updateInstance, createExpense } from '../services/api';
+import ExpenseModal from '../components/ExpenseModal';
 import { toast } from 'sonner';
 
 export default function DailyView() {
     const [tasks, setTasks] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
     const today = new Date(); // Browser's today, ideally matches server if configured correctly
 
     useEffect(() => {
@@ -37,13 +39,36 @@ export default function DailyView() {
         }
     }
 
+    async function handleSaveExpense(expenseData) {
+        try {
+            await createExpense({
+                ...expenseData,
+                service_instance_id: null
+            });
+            toast.success('Despesa registrada com sucesso!');
+            setIsExpenseModalOpen(false);
+        } catch (error) {
+            console.error(error);
+            toast.error('Erro ao salvar despesa');
+        }
+    }
+
     return (
         <div className="space-y-6">
-            <div className="flex flex-col">
-                <h1 className="text-2xl font-bold text-white">Visão Diária</h1>
-                <p className="text-slate-400 capitalize">
-                    {format(today, 'EEEE, d de MMMM', { locale: ptBR })}
-                </p>
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div>
+                    <h1 className="text-2xl font-bold text-white">Visão Diária</h1>
+                    <p className="text-slate-400 capitalize">
+                        {format(today, 'EEEE, d de MMMM', { locale: ptBR })}
+                    </p>
+                </div>
+                <button
+                    onClick={() => setIsExpenseModalOpen(true)}
+                    className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-xl font-medium border border-slate-700 transition-all text-sm"
+                >
+                    <Plus className="w-4 h-4 text-emerald-500" />
+                    Lançar Despesa
+                </button>
             </div>
 
             {isLoading ? (
@@ -56,8 +81,8 @@ export default function DailyView() {
                 <div className="grid gap-4">
                     {tasks.map(task => (
                         <div key={task.id} className={`p-4 rounded-2xl border transition-all ${task.status === 'Completed'
-                                ? 'bg-emerald-900/10 border-emerald-500/20'
-                                : 'bg-slate-800/40 border-slate-700/50 hover:border-cyan-500/30'
+                            ? 'bg-emerald-900/10 border-emerald-500/20'
+                            : 'bg-slate-800/40 border-slate-700/50 hover:border-cyan-500/30'
                             }`}>
                             <div className="flex items-start justify-between gap-4">
                                 <div className="flex-1">
@@ -90,8 +115,8 @@ export default function DailyView() {
                                 <button
                                     onClick={() => toggleStatus(task)}
                                     className={`p-3 rounded-xl transition-all ${task.status === 'Completed'
-                                            ? 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30'
-                                            : 'bg-slate-700/50 text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/10'
+                                        ? 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30'
+                                        : 'bg-slate-700/50 text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/10'
                                         }`}
                                 >
                                     {task.status === 'Completed' ? (
@@ -105,6 +130,13 @@ export default function DailyView() {
                     ))}
                 </div>
             )}
+
+            <ExpenseModal
+                isOpen={isExpenseModalOpen}
+                onClose={() => setIsExpenseModalOpen(false)}
+                onSubmit={handleSaveExpense}
+                date={format(today, 'yyyy-MM-dd')}
+            />
         </div>
     );
 }

@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS service_instances (
     client_id INT REFERENCES clients(id),
     scheduled_date DATE NOT NULL, -- The specific date for THIS job
     status VARCHAR(50) DEFAULT 'Pending', -- Pending, Completed
+    price DECIMAL(10, 2), -- Price charged for this specific visit
     visit_start TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
