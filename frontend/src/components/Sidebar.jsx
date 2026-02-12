@@ -8,7 +8,6 @@ export default function Sidebar() {
     const tabs = [
         { id: 'inicio', path: '/', icon: Home, label: 'Início', matchExact: true },
         { id: 'clientes', path: '/clients', icon: Users, label: 'Clientes' },
-        { id: 'templates', path: '/templates', icon: FileText, label: 'Contratos' },
         { id: 'agenda', path: '/schedule', icon: Calendar, label: 'Agenda Semanal' },
         { id: 'financeiro', path: '/expenses', icon: DollarSign, label: 'Financeiro' },
     ];
