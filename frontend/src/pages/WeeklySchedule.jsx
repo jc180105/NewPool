@@ -95,8 +95,8 @@ function SortableItem({ id, instance }) {
             <div className="flex justify-between items-start">
                 <span className="font-medium text-slate-200 text-sm line-clamp-1">{instance.client_name}</span>
                 <span className={`text-[10px] px-1.5 py-0.5 rounded-full border ${instance.status === 'Completed'
-                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                        : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                    : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
                     }`}>
                     {instance.status === 'Completed' ? 'Ok' : 'P'}
                 </span>
@@ -298,31 +298,10 @@ export default function WeeklySchedule() {
                 onDragStart={handleDragStart}
                 onDragEnd={handleDragEnd}
             >
-                <div className="flex-1 flex gap-4 overflow-hidden">
-                    {/* Clients Sidebar */}
-                    <div className="w-64 shrink-0 flex flex-col bg-slate-900/50 rounded-2xl border border-slate-800/50 hidden md:flex">
-                        <div className="p-4 border-b border-slate-800">
-                            <h3 className="text-white font-medium mb-2">Clientes</h3>
-                            <div className="relative">
-                                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                                <input
-                                    type="text"
-                                    placeholder="Buscar..."
-                                    className="w-full bg-slate-800 border border-slate-700 rounded-lg pl-9 pr-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-cyan-500"
-                                    value={searchTerm}
-                                    onChange={e => setSearchTerm(e.target.value)}
-                                />
-                            </div>
-                        </div>
-                        <div className="flex-1 overflow-y-auto p-2 custom-scrollbar">
-                            {filteredClients.map(client => (
-                                <DraggableClient key={client.id} client={client} />
-                            ))}
-                        </div>
-                    </div>
+                <div className="flex flex-col h-full gap-4 overflow-hidden">
 
-                    {/* Kanban Board */}
-                    <div className="flex-1 overflow-x-auto pb-4">
+                    {/* TOP: Kanban Board */}
+                    <div className="flex-1 overflow-x-auto pb-2">
                         <div className="flex gap-4 min-w-[1000px] h-full">
                             {weekDays.map(day => {
                                 const dateStr = format(day, 'yyyy-MM-dd');
@@ -351,10 +330,10 @@ export default function WeeklySchedule() {
                                                 {dayInstances.map(instance => (
                                                     <SortableItem key={instance.id} id={instance.id} instance={instance} />
                                                 ))}
-                                                {/* Empty space for simpler dropping */}
+                                                {/* Empty space visual cue */}
                                                 {dayInstances.length === 0 && (
-                                                    <div className="h-full flex items-center justify-center text-slate-700 text-xs border-2 border-dashed border-slate-800 rounded-lg">
-                                                        Arraste aqui
+                                                    <div className="h-20 flex items-center justify-center text-slate-700 text-xs border-2 border-dashed border-slate-800 rounded-lg m-2">
+                                                        Solte aqui
                                                     </div>
                                                 )}
                                             </div>
@@ -364,6 +343,41 @@ export default function WeeklySchedule() {
                             })}
                         </div>
                     </div>
+
+                    {/* BOTTOM: Clients Pool (Staging Area) */}
+                    <div className="shrink-0 h-48 bg-slate-900/80 rounded-t-2xl border-t border-x border-slate-700/50 flex flex-col shadow-[0_-4px_20px_rgba(0,0,0,0.3)] z-10">
+                        <div className="p-3 border-b border-slate-800 flex justify-between items-center bg-slate-900 rounded-t-2xl">
+                            <h3 className="text-white font-medium flex items-center gap-2">
+                                <User className="w-4 h-4 text-cyan-500" />
+                                Clientes Disponíveis
+                            </h3>
+                            <div className="relative w-64">
+                                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                                <input
+                                    type="text"
+                                    placeholder="Buscar cliente para arrastar..."
+                                    className="w-full bg-slate-800 border border-slate-700 rounded-lg pl-9 pr-3 py-1.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                                    value={searchTerm}
+                                    onChange={e => setSearchTerm(e.target.value)}
+                                />
+                            </div>
+                        </div>
+                        <div className="flex-1 overflow-x-auto p-3 custom-scrollbar bg-slate-900/50">
+                            <div className="flex gap-3">
+                                {filteredClients.map(client => (
+                                    <div key={client.id} className="w-48 shrink-0">
+                                        <DraggableClient client={client} />
+                                    </div>
+                                ))}
+                                {filteredClients.length === 0 && (
+                                    <div className="text-slate-500 text-sm p-4">
+                                        Nenhum cliente encontrado.
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
                 <DragOverlay>
