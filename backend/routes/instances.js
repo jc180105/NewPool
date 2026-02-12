@@ -36,15 +36,16 @@ router.get('/', async (req, res) => {
 // Create One-off Instance
 router.post('/', async (req, res) => {
     try {
-        const { client_id, scheduled_date, status, visit_start } = req.body;
+        const { client_id, scheduled_date, status, visit_start, price } = req.body;
         // template_id is NULL for one-off
         const result = await pool.query(
-            `INSERT INTO service_instances (client_id, scheduled_date, status, visit_start)
-       VALUES ($1, $2, $3, $4) RETURNING *`,
-            [client_id, scheduled_date, status || 'Pending', visit_start]
+            `INSERT INTO service_instances (client_id, scheduled_date, status, visit_start, price)
+       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+            [client_id, scheduled_date, status || 'Pending', visit_start, price || null]
         );
         res.status(201).json(result.rows[0]);
     } catch (err) {
+        console.error(err);
         res.status(500).json({ error: err.message });
     }
 });
@@ -89,6 +90,12 @@ router.post('/generate', async (req, res) => {
                 );
 
                 if (existing.rows.length === 0) {
+                    // Fetch client's default price for the template auto-generation?
+                    // Ideally yes, but template logic might need to be smarter. 
+                    // For now, let's leave price NULL or handle it later if requested.
+                    // Actually, let's try to get it from the client if possible, but the template query doesn't join.
+                    // Let's leave price NULL for generated items for now, they can be edited.
+
                     await client.query(
                         `INSERT INTO service_instances (template_id, client_id, scheduled_date, status)
                      VALUES ($1, $2, $3, 'Pending')`,
@@ -113,7 +120,7 @@ router.post('/generate', async (req, res) => {
 router.put('/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { scheduled_date, status, visit_start } = req.body;
+        const { scheduled_date, status, visit_start, price } = req.body;
 
         // Updates ONLY the instance. Does NOT touch the template.
         // This satisfies the "Instance Specific" requirement.
@@ -121,9 +128,10 @@ router.put('/:id', async (req, res) => {
             `UPDATE service_instances 
        SET scheduled_date = COALESCE($1, scheduled_date), 
            status = COALESCE($2, status), 
-           visit_start = COALESCE($3, visit_start)
-       WHERE id = $4 RETURNING *`,
-            [scheduled_date, status, visit_start, id]
+           visit_start = COALESCE($3, visit_start),
+           price = COALESCE($4, price)
+       WHERE id = $5 RETURNING *`,
+            [scheduled_date, status, visit_start, price, id]
         );
 
         if (result.rows.length === 0) {
@@ -131,6 +139,7 @@ router.put('/:id', async (req, res) => {
         }
         res.json(result.rows[0]);
     } catch (err) {
+        console.error(err);
         res.status(500).json({ error: err.message });
     }
 });

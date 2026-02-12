@@ -2,10 +2,20 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db');
 
-// Get all expenses
+// Get all expenses (optionally filtered by date)
 router.get('/', async (req, res) => {
     try {
-        const result = await pool.query('SELECT * FROM expenses ORDER BY expense_date DESC');
+        const { start_date, end_date } = req.query;
+        let query = 'SELECT * FROM expenses';
+        const params = [];
+
+        if (start_date && end_date) {
+            query += ' WHERE expense_date BETWEEN $1 AND $2';
+            params.push(start_date, end_date);
+        }
+
+        query += ' ORDER BY expense_date DESC';
+        const result = await pool.query(query, params);
         res.json(result.rows);
     } catch (err) {
         res.status(500).json({ error: err.message });
