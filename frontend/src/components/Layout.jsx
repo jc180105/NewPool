@@ -28,7 +28,7 @@ export default function Layout() {
             </header>
 
             {/* Main Content Area */}
-            <main className="flex-1 w-full max-w-7xl mx-auto sm:px-4 md:pl-64 transition-all duration-300">
+            <main className="flex-1 w-full sm:px-4 md:pl-64 transition-all duration-300">
                 <div className="p-4 md:p-6 pb-24 md:pb-6">
                     <Outlet />
                 </div>

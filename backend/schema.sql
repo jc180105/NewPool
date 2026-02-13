@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS clients (
     fixed_price DECIMAL(10, 2), -- Monthly Fee
     payment_due_day INT, -- Day of month (e.g., 5, 10)
     last_sand_change DATE,
+    active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
